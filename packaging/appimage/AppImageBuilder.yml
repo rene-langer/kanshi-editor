@@ -1,0 +1,94 @@
+# AppImage recipe for appimage-builder, run by packaging/appimage/build.sh inside debian:trixie.
+version: 1
+
+script:
+  - rm -rf AppDir
+  - make install DESTDIR=AppDir PREFIX=/usr
+  - mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+  - rsvg-convert -w 256 -h 256 data/icons/hicolor/scalable/apps/io.github.rene_langer.KanshiEditor.svg
+      -o AppDir/usr/share/icons/hicolor/256x256/apps/io.github.rene_langer.KanshiEditor.png
+
+AppDir:
+  path: ./AppDir
+  app_info:
+    id: io.github.rene_langer.KanshiEditor
+    name: Kanshi Editor
+    icon: io.github.rene_langer.KanshiEditor
+    version: !ENV ${VERSION}
+    exec: usr/bin/python3
+    exec_args: "$APPDIR/usr/bin/kanshi-editor $@"
+
+  apt:
+    arch: amd64
+    allow_unauthenticated: true
+    sources:
+      - sourceline: deb http://deb.debian.org/debian trixie main
+    include:
+      - python3
+      - python3-gi
+      - python3-gi-cairo
+      - python3-cairo
+      - gir1.2-gtk-4.0
+      - gir1.2-adw-1
+      - libadwaita-1-0
+      - librsvg2-common
+      - adwaita-icon-theme
+      - hicolor-icon-theme
+      - shared-mime-info
+      # Not every host has these (minimal installs, containers); bundle them.
+      - libwayland-client0
+      - libwayland-cursor0
+      - libwayland-egl1
+      - libxkbcommon0
+      - libx11-6
+      - libx11-xcb1
+      - libxcb1
+      - libxcb-render0
+      - libxcb-shm0
+      - libxext6
+      - libxrender1
+      - libxrandr2
+      - libxi6
+      - libxfixes3
+      - libxcursor1
+      - libxdamage1
+      - libxinerama1
+      - fontconfig-config
+      - fonts-dejavu-core
+    exclude:
+      # GPU drivers must come from the host; the app renders with cairo anyway.
+      - libgl1-mesa-dri
+      - mesa-vulkan-drivers
+      - libllvm*
+      - systemd
+      - dbus-daemon
+      - perl
+      - perl-base
+
+  files:
+    exclude:
+      - usr/share/man
+      - usr/share/doc
+      - usr/share/lintian
+      - usr/share/locale
+      - usr/lib/python3/dist-packages/*/__pycache__
+
+  runtime:
+    env:
+      PYTHONHOME: "${APPDIR}/usr"
+      PYTHONPATH: "${APPDIR}/usr/lib/python3/dist-packages"
+      PYTHONDONTWRITEBYTECODE: "1"
+      GI_TYPELIB_PATH: "${APPDIR}/usr/lib/x86_64-linux-gnu/girepository-1.0"
+      GDK_PIXBUF_MODULEDIR: "${APPDIR}/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders"
+      GDK_PIXBUF_MODULE_FILE: "${APPDIR}/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders.cache"
+      GSETTINGS_SCHEMA_DIR: "${APPDIR}/usr/share/glib-2.0/schemas"
+      XDG_DATA_DIRS: "${APPDIR}/usr/share:${XDG_DATA_DIRS}:/usr/local/share:/usr/share"
+      GSK_RENDERER: cairo
+      GTK_A11Y: none
+
+AppImage:
+  arch: x86_64
+  # The type2 runtime reads zlib and zstd squashfs images (not xz, the builder default).
+  comp: zstd
+  file_name: !ENV kanshi-editor-${VERSION}-x86_64.AppImage
+  update-information: gh-releases-zsync|rene-langer|kanshi-editor|latest|kanshi-editor-*-x86_64.AppImage.zsync

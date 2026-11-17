@@ -1,0 +1,20 @@
+# Demo configuration for screenshots (see docs/demo/README.md).
+
+# Desk: two identical 27" monitors side by side, laptop below the left one.
+profile desk {
+    output "LG Electronics LG HDR 4K 104NTABC1234" mode 3840x2160@60Hz position 0,0 scale 1.5
+    output "LG Electronics LG HDR 4K 104NTXYZ9876" mode 3840x2160@60Hz position 2560,0 scale 1.5
+    output eDP-1 mode 2880x1800@120Hz position 640,1440 scale 1.5
+    exec $HOME/.local/bin/wallpaper reload
+}
+
+# Laptop plus whatever single monitor is around.
+profile docked {
+    output eDP-1 enable scale 1.5 position 0,0
+    output * enable position 1920,0
+}
+
+# Laptop alone.
+profile mobile {
+    output eDP-1 enable mode 2880x1800@120Hz scale 1.5
+}

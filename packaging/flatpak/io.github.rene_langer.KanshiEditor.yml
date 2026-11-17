@@ -1,0 +1,28 @@
+# Flatpak build of Kanshi Editor.  make flatpak  (or flatpak-builder, see CONTRIBUTING.md)
+id: io.github.rene_langer.KanshiEditor
+runtime: org.gnome.Platform
+runtime-version: '51'
+sdk: org.gnome.Sdk
+command: kanshi-editor
+finish-args:
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --share=ipc
+  - --device=dri
+  # The kanshi config is often a symlink into a dotfiles repository anywhere in $HOME.
+  - --filesystem=home
+  # swaymsg, wlr-randr, kanshictl and grim run on the host via flatpak-spawn --host.
+  - --talk-name=org.freedesktop.Flatpak
+modules:
+  - name: kanshi-editor
+    buildsystem: simple
+    build-commands:
+      - make install PREFIX=/app
+    sources:
+      - type: dir
+        path: ../..
+        skip:
+          - build
+          - dist
+          - .flatpak-builder
+          - .git

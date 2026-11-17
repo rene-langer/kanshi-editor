@@ -1,0 +1,137 @@
+# Builds every package and tests each one on the distros it targets.
+# Called by ci.yml (every push and pull request) and release.yml (tags).
+name: Build packages
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  NFPM_VERSION: 2.48.0
+
+jobs:
+  native:
+    name: deb, rpm and Arch packages
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install nfpm
+        run: |
+          base="https://github.com/goreleaser/nfpm/releases/download/v${NFPM_VERSION}"
+          tarball="nfpm_${NFPM_VERSION}_Linux_x86_64.tar.gz"
+          curl -fsSLO "$base/$tarball"
+          curl -fsSLO "$base/checksums.txt"
+          grep " $tarball\$" checksums.txt | sha256sum -c -
+          sudo tar -xzf "$tarball" -C /usr/local/bin nfpm
+          rm "$tarball" checksums.txt
+      - run: make deb rpm archlinux
+      - uses: actions/upload-artifact@v7
+        with:
+          name: native-packages
+          path: dist/*
+          if-no-files-found: error
+
+  native-test:
+    name: Install test (${{ matrix.image }})
+    needs: native
+    runs-on: ubuntu-24.04
+    container: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: ubuntu:24.04
+            package: "*.deb"
+          - image: debian:trixie
+            package: "*.deb"
+          - image: registry.fedoraproject.org/fedora:latest
+            package: "*.rpm"
+          - image: archlinux:latest
+            package: "*.pkg.tar.zst"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: native-packages
+          path: dist
+      - run: sh packaging/smoke-test.sh dist/${{ matrix.package }}
+
+  appimage:
+    name: AppImage
+    runs-on: ubuntu-24.04
+    container: debian:trixie
+    steps:
+      - uses: actions/checkout@v7
+      - run: apt-get update -qq && apt-get install -y -qq python3 >/dev/null
+      - run: VERSION="$(python3 -c 'import kanshi_editor; print(kanshi_editor.__version__)')" sh packaging/appimage/build.sh
+      - uses: actions/upload-artifact@v7
+        with:
+          name: appimage
+          path: dist/*
+          if-no-files-found: error
+
+  appimage-test:
+    name: AppImage test (${{ matrix.image }})
+    needs: appimage
+    runs-on: ubuntu-24.04
+    container: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - ubuntu:22.04   # older glibc than the bundle: uses the bundled one
+          - debian:bookworm
+          - ubuntu:24.04
+          - registry.fedoraproject.org/fedora:latest
+          - archlinux:latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: appimage
+          path: dist
+      - run: sh packaging/appimage/test.sh dist/*.AppImage
+
+  flatpak:
+    name: Flatpak
+    runs-on: ubuntu-24.04
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-51
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v7
+      - name: Bundle name
+        run: echo "BUNDLE=kanshi-editor-$(python3 -c 'import kanshi_editor; print(kanshi_editor.__version__)').flatpak" >> "$GITHUB_ENV"
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: ${{ env.BUNDLE }}
+          manifest-path: packaging/flatpak/io.github.rene_langer.KanshiEditor.yml
+          upload-artifact: false
+          cache-key: flatpak-builder-${{ github.sha }}
+      - name: Install and run the bundle
+        run: |
+          (dbus-uuidgen 2>/dev/null || tr -d - < /proc/sys/kernel/random/uuid) > /etc/machine-id
+          flatpak install --user -y --noninteractive "$BUNDLE"
+          flatpak run io.github.rene_langer.KanshiEditor --version
+          flatpak run --command=python3 io.github.rene_langer.KanshiEditor -c \
+            'import sys; sys.path.insert(0, "/app/share/kanshi-editor"); import cairo, kanshi_editor.window'
+          mkdir -p dist && mv "$BUNDLE" dist/
+      - uses: actions/upload-artifact@v7
+        with:
+          name: flatpak
+          path: dist/*
+          if-no-files-found: error
+
+  python:
+    name: sdist and wheel
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - run: pipx run build --sdist --wheel --outdir dist/
+      - uses: actions/upload-artifact@v7
+        with:
+          name: python
+          path: dist/*
+          if-no-files-found: error

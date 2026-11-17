@@ -1,0 +1,51 @@
+# Push a tag like v0.2.0 (matching kanshi_editor.__version__ and a CHANGELOG.md
+# section) to build, test and publish every package as a GitHub release.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check version and changelog
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Tag matches the code
+        run: |
+          version="$(python3 -c 'import kanshi_editor; print(kanshi_editor.__version__)')"
+          test "v$version" = "$GITHUB_REF_NAME" || { echo "::error::tag $GITHUB_REF_NAME but __version__ is $version"; exit 1; }
+          grep -q "^## \[$version\]" CHANGELOG.md || { echo "::error::CHANGELOG.md has no [$version] section"; exit 1; }
+          grep -q "release version=\"$version\"" data/io.github.rene_langer.KanshiEditor.metainfo.xml \
+            || { echo "::error::metainfo.xml has no <release> for $version"; exit 1; }
+
+  build:
+    needs: check
+    uses: ./.github/workflows/build.yml
+
+  publish:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Checksums and release notes
+        run: |
+          (cd dist && sha256sum -- * > SHA256SUMS)
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="$version" '$0 ~ "^## \\[" v "\\]" {on=1; next} on && /^## \[/ {exit} on {print}' CHANGELOG.md > notes.md
+          cat notes.md
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --title "Kanshi Editor ${GITHUB_REF_NAME#v}" --notes-file notes.md --verify-tag

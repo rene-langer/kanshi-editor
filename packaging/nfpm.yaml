@@ -1,0 +1,67 @@
+# Native packages (deb, rpm, Arch) from the tree `make stage` puts in build/root.
+# Build with: make deb | make rpm | make archlinux
+name: kanshi-editor
+arch: all
+platform: linux
+version: ${VERSION}
+release: 1
+section: utils
+priority: optional
+maintainer: Rene Langer <rene-langer@users.noreply.github.com>
+description: |
+  Visual editor for kanshi display profiles.
+  Drag displays into place and manage every kanshi profile, including ones for
+  monitors that are not connected. Comments and formatting in the configuration
+  file are kept.
+vendor: Rene Langer
+homepage: https://github.com/rene-langer/kanshi-editor
+license: MIT
+
+contents:
+  - src: build/root/usr/
+    dst: /usr/
+    type: tree
+  - src: LICENSE
+    dst: /usr/share/licenses/kanshi-editor/LICENSE
+    packager: rpm
+  - src: LICENSE
+    dst: /usr/share/licenses/kanshi-editor/LICENSE
+    packager: archlinux
+  - src: LICENSE
+    dst: /usr/share/doc/kanshi-editor/copyright
+    packager: deb
+  - src: README.md
+    dst: /usr/share/doc/kanshi-editor/README.md
+
+overrides:
+  deb:
+    depends:
+      - python3 (>= 3.10)
+      - python3-gi
+      - python3-gi-cairo
+      - python3-cairo
+      - gir1.2-gtk-4.0
+      - gir1.2-adw-1 (>= 1.5)
+    recommends:
+      - kanshi
+      - grim
+  rpm:
+    depends:
+      - python3 >= 3.10
+      - python3-gobject
+      - python3-cairo
+      - gtk4
+      - libadwaita >= 1.5
+    recommends:
+      - kanshi
+      - grim
+  archlinux:
+    depends:
+      - python
+      - python-gobject
+      - python-cairo
+      - gtk4
+      - libadwaita
+    suggests:
+      - kanshi
+      - grim

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Kanshi Editor
+GenericName=Display Profile Editor
+Comment=Arrange kanshi display profiles visually
+Exec=kanshi-editor %F
+Icon=io.github.rene_langer.KanshiEditor
+Terminal=false
+Categories=Settings;HardwareSettings;GTK;
+Keywords=display;monitor;output;screen;kanshi;sway;wayland;wlroots;
+StartupNotify=true

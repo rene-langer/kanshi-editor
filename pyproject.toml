@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kanshi-editor"
+dynamic = ["version"]
+description = "A visual editor for kanshi display profiles"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Rene Langer" }]
+requires-python = ">=3.10"
+# PyGObject, pycairo, GTK 4 and libadwaita come from the system packages; see README.
+dependencies = []
+keywords = ["kanshi", "sway", "wayland", "wlroots", "display", "monitor", "gtk"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: X11 Applications :: GTK",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Desktop Environment :: Window Managers",
+    "Topic :: System :: Hardware",
+]
+
+[project.urls]
+Homepage = "https://github.com/rene-langer/kanshi-editor"
+Issues = "https://github.com/rene-langer/kanshi-editor/issues"
+Changelog = "https://github.com/rene-langer/kanshi-editor/blob/main/CHANGELOG.md"
+
+[project.gui-scripts]
+kanshi-editor = "kanshi_editor.app:main"
+
+[tool.setuptools]
+packages = ["kanshi_editor"]
+
+[tool.setuptools.dynamic]
+version = { attr = "kanshi_editor.__version__" }
+
+[tool.ruff]
+line-length = 130
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = ["E402"]  # gi.require_version() must run before the gi.repository imports

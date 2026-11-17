@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: kanshi itself
+    url: https://gitlab.freedesktop.org/emersion/kanshi/-/issues
+    about: Problems with how kanshi applies profiles belong upstream.
+  - name: Security issue
+    url: https://github.com/rene-langer/kanshi-editor/security/advisories/new
+    about: Report vulnerabilities privately.

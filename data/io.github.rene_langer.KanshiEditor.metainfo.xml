@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.rene_langer.KanshiEditor</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Kanshi Editor</name>
+  <summary>Arrange kanshi display profiles visually</summary>
+  <developer id="io.github.rene_langer">
+    <name>Rene Langer</name>
+  </developer>
+  <description>
+    <p>
+      Kanshi Editor is a graphical editor for kanshi, the display profile daemon for
+      sway and other wlroots compositors. Drag displays into place, pick resolution,
+      scale and rotation, and manage every profile, including ones for monitors that
+      are not plugged in right now.
+    </p>
+    <p>Your configuration file stays yours: comments and formatting are kept, and only the lines you change are rewritten.</p>
+    <ul>
+      <li>All profiles in one place, in the order kanshi tries them</li>
+      <li>Displays drawn to scale, with snapping while you drag</li>
+      <li>Live screen pictures and connector names tell identical monitors apart</li>
+      <li>Shows which profile kanshi is using right now</li>
+      <li>Warnings for overlapping or unreachable displays</li>
+      <li>Saves, reloads kanshi and switches profiles for you</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">io.github.rene_langer.KanshiEditor.desktop</launchable>
+  <provides>
+    <binary>kanshi-editor</binary>
+  </provides>
+  <url type="homepage">https://github.com/rene-langer/kanshi-editor</url>
+  <url type="bugtracker">https://github.com/rene-langer/kanshi-editor/issues</url>
+  <url type="vcs-browser">https://github.com/rene-langer/kanshi-editor</url>
+  <url type="contribute">https://github.com/rene-langer/kanshi-editor/blob/main/CONTRIBUTING.md</url>
+  <screenshots>
+    <screenshot type="default">
+      <caption>Two identical monitors, told apart by connector and screen contents</caption>
+      <image>https://raw.githubusercontent.com/rene-langer/kanshi-editor/main/docs/screenshots/desk.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>A profile for a laptop and any external monitor</caption>
+      <image>https://raw.githubusercontent.com/rene-langer/kanshi-editor/main/docs/screenshots/docked.png</image>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1"/>
+  <requires>
+    <display_length compare="ge">768</display_length>
+  </requires>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+  </supports>
+  <branding>
+    <color type="primary" scheme_preference="light">#99c1f1</color>
+    <color type="primary" scheme_preference="dark">#1a5fb4</color>
+  </branding>
+  <releases>
+    <release version="0.1.0" date="2026-11-17">
+      <description>
+        <p>First release.</p>
+      </description>
+    </release>
+  </releases>
+</component>

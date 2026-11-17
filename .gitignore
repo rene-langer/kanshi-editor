@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+build/
+dist/
+AppDir/
+.flatpak-builder/
+*.egg-info/
+.ruff_cache/

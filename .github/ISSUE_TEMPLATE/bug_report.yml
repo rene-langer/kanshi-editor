@@ -1,0 +1,43 @@
+name: Bug report
+description: Something doesn't work, or the editor changed your config unexpectedly.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Kanshi Editor version
+      description: Output of `kanshi-editor --version`
+      placeholder: kanshi-editor 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How did you install it?
+      options: [AppImage, Flatpak, deb, rpm, Arch package, From source]
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Distro, compositor and kanshi version
+      placeholder: Fedora 45, sway 1.11, kanshi 1.9.0
+  - type: textarea
+    id: config
+    attributes:
+      label: Relevant part of your kanshi config
+      description: Replace serial numbers if you like. If the editor changed lines you didn't edit, paste the *Show Changes* diff.
+      render: text
+  - type: textarea
+    id: log
+    attributes:
+      label: Terminal output
+      description: Start `kanshi-editor` from a terminal and paste any errors.
+      render: text
